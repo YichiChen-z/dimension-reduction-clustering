@@ -14,7 +14,6 @@ Usage:
 
 import pandas as pd
 import umap
-import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
 import numpy as np
 
