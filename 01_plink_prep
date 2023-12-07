@@ -1,18 +1,31 @@
 #!/bin/bash
 
-#Check if Plink v1.9 is present in the dependencies folder
+# Check if Plink v1.9 is present in the dependencies folder
 plink_path="./dependencies/plink_v1.9/plink"
 
-#LD-pruning
+# LD-pruning
 plink \
-      --bfile genotype_data_after_processing \ 
+      --bfile genotype_data_after_processing \
       --hwe 1e-6 \
       --indep-pairwise 50 5 0.2 \
       --maf 0.01 \
       --make-bed \
-      --out genotype_data_LD_pruned \
+      --out genotype_data_LD_pruned \  # Output file after LD-pruning
 
-#Initial dimension reduction using plink
+# Initial dimension reduction using plink
 plink \
       --bfile genotype_data_LD_pruned \
-      --pca 20 \
+      --pca 20  # Perform PCA with 20 components
+
+#######################################
+# Script Usage Instructions
+#######################################
+
+# Usage:
+# 1. Ensure Plink v1.9 is present in the dependencies folder.
+# 2. Prepare genotypic data in Plink binary format as "genotype_data_after_processing" first.
+# 3. Execute this script.
+
+# Note:
+# - Adjust parameters as needed 
+# - The script generates a Plink eigenvec file ("plink.eigenvec") for further analysis.
