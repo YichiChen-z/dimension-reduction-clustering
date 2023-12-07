@@ -1,0 +1,12 @@
+#prepration_bfile_from_PLINK_LD-pruning
+plink \
+      --bfile genotype_data_after_processing \ 
+      --hwe 1e-6 \
+      --indep-pairwise 50 5 0.2 \
+      --maf 0.01 \
+      --make-bed \
+      --out genotype_data_LD_pruned \
+
+plink \
+      --bfile genotype_data_LD_pruned \
+      --pca 20 \
