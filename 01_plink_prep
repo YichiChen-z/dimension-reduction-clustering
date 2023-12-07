@@ -1,4 +1,9 @@
-#prepration_bfile_from_PLINK_LD-pruning
+#!/bin/bash
+
+#Check if Plink v1.9 is present in the dependencies folder
+plink_path="./dependencies/plink_v1.9/plink"
+
+#LD-pruning
 plink \
       --bfile genotype_data_after_processing \ 
       --hwe 1e-6 \
@@ -7,6 +12,7 @@ plink \
       --make-bed \
       --out genotype_data_LD_pruned \
 
+#Initial dimension reduction using plink
 plink \
       --bfile genotype_data_LD_pruned \
       --pca 20 \
