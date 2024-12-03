@@ -1,0 +1,11 @@
+#!/bin/bash
+# Genetic Variance Analysis
+
+
+plink --bfile bfile \
+  --within clusters.txt \
+  --fst \
+  --out fst
+
+# Notes:
+# - Use clusters.txt for overall, pairwise, or one-vs-all FST by modifying cluster assignments.
