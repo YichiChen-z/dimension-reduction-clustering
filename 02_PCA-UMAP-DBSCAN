@@ -27,8 +27,8 @@ reducer = umap.UMAP()
 embedding_umap = reducer.fit_transform(pca_data)
 
 # Set parameters for DBSCAN
-eps = 0.065
-min_samples = 4
+eps = 0.068
+min_samples = 3
 
 # Define a function to get sorted clusters based on centroids
 def get_sorted_clusters(embedding, labels):
