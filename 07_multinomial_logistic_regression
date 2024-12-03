@@ -1,0 +1,34 @@
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+import statsmodels.api as sm
+
+# Load the dataset: data 
+
+# Define independent variables, excluding the dependent variable and covariates
+independent_variable_columns = [col for col in data.columns if col not in ['cluster', 'age', 'sex', 'bmi', 'FID', 'IID']]
+
+# Prepare a list to store results
+results_list = []
+
+# Perform multinomial logistic regression for each independent variable
+for col in independent_variable_columns:
+    # Include covariates (bmi, age, sex) and the current independent variable
+    X = data[['bmi', 'age', 'sex', col]]
+    y = data['cluster']
+
+    # Fit the multinomial logistic regression model (Sklearn for quick fitting)
+    model = LogisticRegression(multi_class="multinomial", solver="lbfgs", max_iter=10000)
+    model.fit(X, y)
+
+    # Use Statsmodels for detailed summary output
+    sm_model = sm.MNLogit(y, sm.add_constant(X)).fit()
+
+    # Store results
+    results_list.append((col, sm_model))
+
+# Save all results to a text file
+with open('multinomial_logistic_regression_results.txt', 'w') as file:
+    for col, result in results_list:
+        file.write(f"Independent Variable: {col}\n")
+        file.write(result.summary().as_text())
+        file.write("\n\n")
