@@ -1,31 +1,46 @@
 #!/bin/bash
+# Genotyping and Quality Control Workflow
 
-# Check if Plink v1.9 is present in the dependencies folder
-plink_path="./dependencies/plink_v1.9/plink"
+# Step 1: Quality Control on Raw Genotype Data
+plink --vcf raw_genotypes.vcf.gz \
+  --maf 0.01 \
+  --hwe 1e-6 \
+  --geno 0.01 \
+  --make-bed \
+  --out qc_step1
 
-# LD-pruning
-plink \
-      --bfile genotype_data_after_processing \
-      --hwe 1e-6 \
-      --indep-pairwise 50 5 0.2 \
-      --maf 0.01 \
-      --make-bed \
-      --out genotype_data_LD_pruned \  # Output file after LD-pruning
+# Step 2: Linkage Disequilibrium (LD) Pruning
+plink --bfile qc_step1 \
+  --indep-pairwise 50 5 0.2 \
+  --out ld_pruned
 
-# Initial dimension reduction using plink
-plink \
-      --bfile genotype_data_LD_pruned \
-      --pca 20  # Perform PCA with 20 components
+plink --bfile qc_step1 \
+  --extract ld_pruned.prune.in \
+  --make-bed \
+  --out qc_final
 
-#######################################
-# Script Usage Instructions
-#######################################
+# Step 3: Phasing with Eagle v2.4.1
+eagle --bfile qc_final \
+  --outPrefix phased_genotypes.vcf.gz \
+  --geneticMapFile reference_map_file.txt
 
-# Usage:
-# 1. Ensure Plink v1.9 is present in the dependencies folder.
-# 2. Prepare genotypic data in Plink binary format as "genotype_data_after_processing" first.
-# 3. Execute this script.
+# Step 4: Genotype Imputation with Minimac3
+minimac3 --refHaps reference_panel.m3vcf.gz \
+  --haps phased_genotypes.vcf.gz \
+  --prefix imputed_genotypes
 
-# Note:
-# - Adjust parameters as needed 
-# - The script generates a Plink eigenvec file ("plink.eigenvec") for further analysis.
+# Step 5: Post-Imputation Filtering and Annotation
+bcftools filter --exclude "INFO/R2 < 0.7" \
+  -O z \
+  -o filtered_imputed.vcf.gz \
+  imputed_genotypes.dose.vcf.gz
+
+bcftools annotate --annotations common_all_20180423.vcf.gz \
+  -O z \
+  -o annotated_filtered.vcf.gz \
+  filtered_imputed.vcf.gz
+
+# Step 6: Dimension Reduction using PLINK PCA
+plink --bfile genotype_data_LD_pruned \
+  --pca 20 \
+  --out pca_results
