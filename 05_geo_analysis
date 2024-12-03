@@ -1,0 +1,38 @@
+import pandas as pd
+import numpy as np
+from scipy.stats import chi2_contingency
+from sklearn.metrics import roc_curve, auc, accuracy_score, cross_val_predict
+from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import label_binarize
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multiclass import OneVsRestClassifier
+
+# Load datasets: geo_data, cluster_data 
+
+# Merge datasets
+data = pd.merge(geo_data, cluster_data, on='IID', how='inner').dropna()
+
+# Chi-square test for significant association of geographical features with clusters
+columns_to_test = [col for col in geo_data.columns if col not in ['IID', 'Cluster']]
+with open("chi_square_results.txt", "w") as file:
+    for column in columns_to_test:
+        contingency_table = pd.crosstab(data['Cluster'], data[column])
+        chi2, p, _, _ = chi2_contingency(contingency_table)
+        significance = "significant" if p < 0.05 else "not significant"
+        file.write(f"{column}: Chi2={chi2:.2f}, p={p:.4f}, {significance}\n")
+
+# Prepare feature sets and target variable
+geo_sig = ['Feature1', 'Feature2']  # Replace with significant features
+geo_all = [col for col in geo_data.columns if col not in ['IID', 'Cluster']]
+X_sets = [data[geo_sig], data[geo_all]]
+y = data['Cluster']
+
+# Stratified cross-validation
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+# Evaluate prediction models for accuracy
+for X, name in zip(X_sets, ['Significant Features', 'All Features']):
+    clf = OneVsRestClassifier(RandomForestClassifier(random_state=42))
+    y_pred = cross_val_predict(clf, X, y, cv=cv)
+    accuracy = accuracy_score(y, y_pred)
+    print(f"{name} Accuracy: {accuracy:.2f}")
