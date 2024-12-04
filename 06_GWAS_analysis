@@ -2,7 +2,7 @@
 # GWAS Analysis: One-vs-All Case-Control Studies
 
 # Perform GWAS for each cluster
-for i in {1..6}; do
+for i in {1..4}; do
   pheno_file=${phenotype_files[$((i-1))]}
   plink --bfile $bfile \
         --logistic \
