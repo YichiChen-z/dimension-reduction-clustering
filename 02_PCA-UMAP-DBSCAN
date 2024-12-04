@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-UMAP and DBSCAN Clustering Script
-
-This script reads PCA results from plink.eigenvec, performs UMAP projection,
-and applies DBSCAN clustering on the resulting UMAP-transformed data.
-
-Usage:
-1. Install dependencies: pip install -r requirements.txt
-2. Run the script: ./your_script.py
-"""
-
 
 import pandas as pd
 import umap
