@@ -19,10 +19,10 @@ plink --bfile qc_step1 \
   --make-bed \
   --out qc_final
 
-# Step 3: Phasing with Eagle v2.4.1
+# Step 3: Phasing with Eagle v2.4.1. The reference file used in this project is 1KGP-JPT extracted from 1000 Genomes phase 3 version 5 
 eagle --bfile qc_final \
   --outPrefix phased_genotypes.vcf.gz \
-  --geneticMapFile reference_map_file.txt
+  --geneticMapFile reference_file.txt
 
 # Step 4: Genotype Imputation with Minimac3
 minimac3 --refHaps reference_panel.m3vcf.gz \
