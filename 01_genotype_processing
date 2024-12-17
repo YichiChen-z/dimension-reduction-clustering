@@ -21,16 +21,30 @@ for chr in {1..22}; do
   minimac3 \
       --refHaps reference_panel_chr${chr}.m3vcf.gz \
       --haps JPT_phased_chr${chr}.vcf.gz \
+      --map map_file_chr${chr}.txt \
       --prefix imputed_chr${chr}
 done
 
-# Merge phased and imputed VCF files into one file using bcftools
+# Step 3: Merge phased and imputed VCF files into one file using bcftools
 bcftools concat -Oz -o merged_imputed.vcf.gz imputed_chr{1..22}.vcf.gz
 
-# Step 3: Post-imputation Quality Control to avoid imputation artifacts
-# Convert merged VCF to PLINK format and perform QC
+# Step 4: Filtering and Annotation
+bcftools filter \
+    --exclude "INFO/R2 < 0.7" \
+    -O z \
+    -o filtered_imputed.vcf.gz \
+    merged_imputed.vcf.gz
+
+bcftools annotate \
+    --annotations common_all_20180423.vcf.gz \
+    -O z \
+    -o annotated_filtered.vcf.gz \
+    filtered_imputed.vcf.gz
+
+# Step 5: Post-Quality Control to avoid imputation artifacts
+# Convert filtered VCF to PLINK format and perform QC
 plink \
-    --vcf merged_imputed.vcf.gz \
+    --vcf annotated_filtered.vcf.gz \
     --make-bed \
     --out final_genotypes
 
@@ -42,7 +56,7 @@ plink \
     --make-bed \
     --out qc_step1
 
-# Step 4: Linkage Disequilibrium (LD) Pruning
+# Step 6: Linkage Disequilibrium (LD) Pruning
 plink \
     --bfile qc_step1 \
     --indep-pairwise 50 5 0.2 \
@@ -54,20 +68,7 @@ plink \
     --make-bed \
     --out qc_final
 
-# Step 5: Post-Imputation Filtering and Annotation
-bcftools filter \
-    --exclude "INFO/R2 < 0.7" \
-    -O z \
-    -o filtered_imputed.vcf.gz \
-    imputed_genotypes.dose.vcf.gz
-
-bcftools annotate \
-    --annotations common_all_20180423.vcf.gz \
-    -O z \
-    -o annotated_filtered.vcf.gz \
-    filtered_imputed.vcf.gz
-
-# Step 6: Dimension Reduction using PLINK PCA
+# Step 7: Dimension Reduction using PLINK PCA
 plink \
     --bfile qc_final \
     --pca 20 \
