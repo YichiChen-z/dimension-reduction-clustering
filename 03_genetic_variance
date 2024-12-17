@@ -2,7 +2,7 @@
 # Genetic Variance Analysis
 
 
-plink --bfile genotype_data_LD_pruned \
+plink --bfile qc_final \
   --within clusters.txt \
   --fst \
   --out fst
